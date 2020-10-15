@@ -1,0 +1,45 @@
+{
+  "name": "just-chat",
+  "author": "swansswansswansswanssosoft",
+  "version": "1.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "firebase": "^7.23.0",
+    "pebble-clay": "^1.0.4",
+    "regenerator-runtime": "^0.13.7",
+    "whatwg-fetch": "^3.4.1"
+  },
+  "pebble": {
+    "displayName": "Just Chat",
+    "uuid": "d7a268aa-fe97-43df-b9b6-06cc5eb2ffa8",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": {
+      "MessageText": 100,
+      "MessageUser": 101,
+      "ShouldVibrate": 102
+    },
+    "resources": {
+      "media": []
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "babel-loader": "^8.1.0",
+    "webpack": "^5.1.0",
+    "webpack-cli": "^4.0.0"
+  }
+}
