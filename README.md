@@ -12,6 +12,6 @@ Needs:
 1. Message memory management
 2. Make config page to allow users some configuration
 
-Notes:
--There is no chat history and I don't intend to implement one
--Current username is first four characters of the user's Rebble token
+Notes: 
+1. There is no chat history and I don't intend to implement one
+2. Current username is first four characters of the user's Rebble token
