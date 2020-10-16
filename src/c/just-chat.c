@@ -15,8 +15,8 @@ static TextLayer *s_text_layers[MAX_MESSAGES];
 static ScrollLayer *s_scroll_layer;
 
 // static int timeout = 30000;
-static int should_vibrate = 0;
-
+static int should_vibrate = 1;
+static int should_confirm_dictation = 0;
 
 // static void timeout_and_exit(){
 //   exit_reason_set(APP_EXIT_ACTION_PERFORMED_SUCCESSFULLY);
@@ -186,6 +186,13 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     persist_write_int(ShouldVibrate, should_vibrate_tuple->value->int32);
   }
   
+  Tuple *should_confirm_dictation_tuple = dict_find( iter, ShouldConfirmDictation );
+  if (should_confirm_dictation_tuple) {
+    should_confirm_dictation = should_confirm_dictation_tuple->value->int32;
+    persist_write_int(ShouldVibrate, should_confirm_dictation_tuple->value->int32);
+    dictation_session_enable_confirmation(s_dictation_session, should_confirm_dictation);
+  }
+  
 }
 
 static void in_dropped_handler(AppMessageResult reason, void *context){
@@ -204,9 +211,14 @@ static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
+
+  //recall settinngs from persistent storage
+  should_vibrate = persist_read_int(ShouldVibrate);
+  should_confirm_dictation = persist_read_int(ShouldConfirmDictation);
+
   //create dictation and set confirmation mode to false
   s_dictation_session = dictation_session_create(sizeof(s_sent_message), dictation_session_callback, NULL);
-  dictation_session_enable_confirmation(s_dictation_session, false);
+  dictation_session_enable_confirmation(s_dictation_session, should_confirm_dictation);
 
   //create scroll layer 
   GRect scroll_bounds = GRect(0, 0, bounds.size.w, bounds.size.h);
@@ -227,13 +239,6 @@ static void prv_window_load(Window *window) {
 
   //add scroll layer to the root window
   layer_add_child(window_layer, scroll_layer_get_layer(s_scroll_layer));
-
-
-  //start dictation on first launch
-  should_vibrate = persist_read_int(ShouldVibrate);
-  // if (immediate_dictation) {
-	//   dictation_session_start(s_dictation_session);
-  // }
 
   //testing
   // add_new_message("test test test test test test test test test test test test test test test test test test ", true);

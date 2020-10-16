@@ -1,14 +1,16 @@
 var configuration = null;
 
-// Pebble.addEventListener('showConfiguration', function(e) {
-//   Pebble.openURL('url.com');
-// });
+Pebble.addEventListener('showConfiguration', function(e) {
+  Pebble.openURL('https://pebble-chat.web.app/' + Pebble.getAccountToken());
+});
 
-// Pebble.addEventListener('webviewclosed', function(e) {
-//   if (e && !e.response) { return; }
-//   configuration = JSON.parse(decodeURIComponent(e.response));
-//   console.log(configuration);
-// });
+Pebble.addEventListener('webviewclosed', function(e) {
+  if (e && !e.response) { return; }
+  configuration = JSON.parse(decodeURIComponent(e.response));
+  localStorage.setItem("configuration", JSON.stringify(configuration));
+  Pebble.sendAppMessage(configuration.settings);
+  console.log(JSON.stringify(configuration));
+});
 
 
 import firebase from 'firebase/app';
@@ -39,7 +41,7 @@ var globalMessage = app.database().ref('globalMessage');
 
 globalMessage.on("child_changed", (a)=>{
   var m = a.val();
-  if (m.message.slice(0,4) != String(Pebble.getAccountToken()).slice(0,4)) {
+  if (m.user != configuration.user.chosenUserName) {
     Pebble.sendAppMessage({
       "MessageText":m.message,
       "MessageUser":m.user
@@ -53,16 +55,32 @@ Pebble.addEventListener("ready",
         // console.log(Pebble.getAccountToken());
         // console.log(JSON.stringify(Pebble.getActiveWatchInfo()));
         // console.log(Pebble.getWatchToken());
+        configuration = JSON.parse(localStorage.getItem("configuration"));
+        if (configuration){
+          Pebble.sendAppMessage(configuration.settings);
+        } else {
+          Pebble.sendAppMessage({
+            "MessageText":'Hey! Before you can send messages you need to visit the configuration page in the Pebble app!',
+            "MessageUser":'admin'
+          })  
+        }
     }
 )
 
 Pebble.addEventListener('appmessage', function(e) {
   var message = e.payload["0"];
-  var user = String(Pebble.getAccountToken()).slice(0,4);
-  globalMessage.child('0').update({
-    user:user,
-    message:user + ': \n' + message
-  })
+  // var user = String(Pebble.getAccountToken()).slice(0,4);
+  if (configuration){
+    globalMessage.child('0').update({
+      user:configuration.user.chosenUserName,
+      message:configuration.user.chosenUserName + ': \n' + message
+    })
+  } else {
+    Pebble.sendAppMessage({
+      "MessageText":'You cannot send messages until you visit the configuration page in the Pebble app.',
+      "MessageUser":'admin'
+    })  
+  }
 });
 
 

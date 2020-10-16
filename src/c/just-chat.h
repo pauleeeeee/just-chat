@@ -11,7 +11,7 @@
 #define MessageText 100
 #define MessageUser 101
 #define ShouldVibrate 102
-
+#define ShouldConfirmDictation 103
 
 typedef struct MessageBubble {
   // the text displayed in the bubble

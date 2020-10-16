@@ -29,7 +29,8 @@
     "messageKeys": {
       "MessageText": 100,
       "MessageUser": 101,
-      "ShouldVibrate": 102
+      "ShouldVibrate": 102,
+      "ShouldConfirmDictation": 103
     },
     "resources": {
       "media": []
