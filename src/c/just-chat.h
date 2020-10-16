@@ -5,19 +5,20 @@
 
 
 // #define DOTSHEIGHT 28
-#define MAX_MESSAGES 32
+#define MAX_MESSAGES 10
 #define MAX_MESSAGE_LENGTH 512
+#define MAX_MESSAGES_DATA 5120
 
 #define MessageText 100
 #define MessageUser 101
 #define ShouldVibrate 102
 #define ShouldConfirmDictation 103
 
-typedef struct MessageBubble {
+typedef struct {
   // the text displayed in the bubble
-  char text[512];
-
-  // user or assistant?
+  char* text;
+  int len;
+  // user or other
   bool is_user;
 
 } MessageBubble;

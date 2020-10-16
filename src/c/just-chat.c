@@ -1,6 +1,8 @@
 #include "./just-chat.h"
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static Window *s_window;
 static DictationSession *s_dictation_session;
@@ -23,19 +25,76 @@ static int should_confirm_dictation = 0;
 //   window_stack_remove(s_window, false);
 // }
 
+static int msgsDataAvailable = MAX_MESSAGES_DATA;
 
-int get_num_messages() {
-  return s_num_messages;
-}
+static int msgsTop = 0;
+static int msgsCount = 0;
+
+
+// int get_num_messages() {
+//   return msgsCount;
+//   // return s_num_messages;
+// }
 
 MessageBubble *get_message_by_id(int id) {
   return &s_message_bubbles[id];
 }
 
+
+int msgs_get_idx(int idx){
+	int trueIdx = msgsTop - 1 - idx;
+	if(trueIdx < 0) trueIdx += MAX_MESSAGES;
+	return trueIdx;
+}
+
+MessageBubble* msgs_get(int idx){
+	return &s_message_bubbles[msgs_get_idx(idx)];
+}
+
+void msg_delete_last(){
+	int idx = msgs_get_idx(--msgsCount);
+	printf("DelLast at %d\n", idx);
+
+	msgsDataAvailable += s_message_bubbles[idx].len;
+	free(s_message_bubbles[idx].text);
+}
+
+void msg_gc(int bytes){ // Garbage Collect.
+	printf("GC %d bytes. Top = %d, Depth = %d\n", bytes, msgsTop, msgsCount);
+	if(bytes > MAX_MESSAGES_DATA) {
+		return; // Error.
+	}
+	while(msgsDataAvailable < bytes){ // Just keep deleting message entries until we have space.
+		printf("\tGC Cycle\n");
+		msg_delete_last();
+	}
+	printf("Finish GC. Top = %d, Depth = %d\n", msgsTop, msgsCount);
+}
+
+MessageBubble* msg_push(MessageBubble msg){
+	if(msg.len > MAX_MESSAGES_DATA){ // Message too long for buffer. 
+		return NULL; // Error.
+	}
+	msg_gc(msg.len); // Ensure there is room in the message string data buffer for this new message.
+
+	if(msgsCount - 1 == MAX_MESSAGES){ // No more space in the messages list. Make room for new message metadata.
+		msg_delete_last();
+	}
+
+	s_message_bubbles[msgsTop++] = msg;
+	msgsCount++;
+	msgsDataAvailable -= msg.len;
+
+	printf("Left = %d. NewTop = %d\n", msgsDataAvailable, msgsTop);
+  
+  return NULL;
+}
+
 //creates a text layer that is appropriately sized AND placed for the message.
 TextLayer *render_new_bubble(int index, GRect bounds) {
   //get text from message array
-  char *text = s_message_bubbles[index].text;
+  // char *text = s_message_bubbles[index].text;
+  char *text = msgs_get(index)->text;
   //set font
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
   //set bold if message is from user
@@ -57,7 +116,7 @@ TextLayer *render_new_bubble(int index, GRect bounds) {
   text_layer_set_background_color(text_layer, GColorClear);
 
   //set alignment depending on whether the message was made by the user or the assistant
-  if (s_message_bubbles[index].is_user){
+  if (msgs_get(index)->is_user){
     text_layer_set_text_alignment(text_layer, GTextAlignmentRight);
   } else {
     text_layer_set_text_alignment(text_layer, GTextAlignmentLeft);
@@ -80,7 +139,7 @@ static void draw_message_bubbles(){
   GRect bounds = GRect(5, 0, (layer_get_bounds(window_layer).size.w - 10), 5);
 
     //for each message, render a new bubble (stored in the text layers array), adjust the important bounds object, and update the scroll layer's size
-    for(int index = 0; index < s_num_messages; index++) {
+    for(int index = 0; index < msgsCount; index++) {
       //render the bubble for the message
       s_text_layers[index] = render_new_bubble(index, bounds);
       //adjust bounds based on the height of the bubble rendered
@@ -94,20 +153,30 @@ static void draw_message_bubbles(){
   scroll_layer_set_content_offset(s_scroll_layer, GPoint(0,-bounds.size.h), true);
 }
 
+
+
 //adds a new message to the messages array but does not render anything
 static void add_new_message(char *text, bool is_user){
-  //safeguard to prevent too many bubbles being added
-  //I have no experience managing memory so review here would be great. let's get as many messages as possible!
-  if(s_num_messages < MAX_MESSAGES && strlen(text) > 0) {
-    //set the message text and the is_user bool
-    strncpy(s_message_bubbles[s_num_messages].text, text, MAX_MESSAGE_LENGTH - 1);
-    s_message_bubbles[s_num_messages].is_user = is_user;
-    //increment the number of messages int. This int is used throughout the other functions
-    s_num_messages++;
-  } else {
-    APP_LOG(APP_LOG_LEVEL_WARNING, "Failed to add message to bubble list; exceeded maximum number of bubbles");
-  }
+  // // safeguard to prevent too many bubbles being added
+  // // I have no experience managing memory so review here would be great. let's get as many messages as possible!
+  // if(s_num_messages < MAX_MESSAGES && strlen(text) > 0) {
+  //   //set the message text and the is_user bool
+  //   strncpy(s_message_bubbles[s_num_messages].text, text, MAX_MESSAGE_LENGTH - 1);
+  //   s_message_bubbles[s_num_messages].is_user = is_user;
+  //   //increment the number of messages int. This int is used throughout the other functions
+  //   s_num_messages++;
+  // } else {
+  //   APP_LOG(APP_LOG_LEVEL_WARNING, "Failed to add message to bubble list; exceeded maximum number of bubbles");
+  // }
+
+  	char* buf = malloc(*text);
+		// printf("Message: ");
+		// fgets(buf,64,stdin);
+
+		msg_push((MessageBubble){buf, strlen(buf), is_user});
 }
+
+
 
 
 //standard dictation callback
