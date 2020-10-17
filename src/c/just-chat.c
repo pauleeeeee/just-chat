@@ -97,6 +97,7 @@ TextLayer *render_new_bubble(int index, GRect bounds) {
   //get text from message array
   // char *text = s_message_bubbles[index].text;
   char *text = msgs_get(index)->text;
+  // printf(text);
   //set font
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
   //set bold if message is from user
@@ -160,7 +161,7 @@ static void draw_message_bubbles(){
 
 //adds a new message to the messages array but does not render anything
 static void add_new_message(char *text, bool is_user){
-		msg_push((MessageBubble){text, strlen(text) + 1, is_user});
+		msg_push((MessageBubble){text, strlen(text), is_user});
 }
 
 
