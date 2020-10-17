@@ -25,7 +25,7 @@ static int should_confirm_dictation = 0;
 //   window_stack_remove(s_window, false);
 // }
 
-static int msgsDataAvailable = MAX_MESSAGES_DATA;
+static int msgsDataAvailable = MAX_MESSAGES_POOL_SIZE;
 
 static int msgsTop = 0;
 static int msgsCount = 0;
@@ -60,19 +60,16 @@ void msg_delete_last(){
 }
 
 void msg_gc(int bytes){ // Garbage Collect.
-	printf("GC %d bytes. Top = %d, Depth = %d\n", bytes, msgsTop, msgsCount);
-	if(bytes > MAX_MESSAGES_DATA) {
+	if(bytes > MAX_MESSAGES_POOL_SIZE) {
 		return; // Error.
 	}
 	while(msgsDataAvailable < bytes){ // Just keep deleting message entries until we have space.
-		printf("\tGC Cycle\n");
 		msg_delete_last();
 	}
-	printf("Finish GC. Top = %d, Depth = %d\n", msgsTop, msgsCount);
 }
 
 MessageBubble* msg_push(MessageBubble msg){
-	if(msg.len > MAX_MESSAGES_DATA){ // Message too long for buffer. 
+	if(msg.len > MAX_MESSAGES_POOL_SIZE){ // Message too long for buffer. 
 		return NULL; // Error.
 	}
 	msg_gc(msg.len); // Ensure there is room in the message string data buffer for this new message.
@@ -98,7 +95,7 @@ TextLayer *render_new_bubble(int index, GRect bounds) {
   //set font
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
   //set bold if message is from user
-  if (s_message_bubbles[index].is_user){
+  if (msgs_get(index)->is_user){
     font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
   } 
   //create a holder GRect to use to measure the size of the final textlayer for the message all integers like '5' and '10' are for padding
@@ -139,7 +136,7 @@ static void draw_message_bubbles(){
   GRect bounds = GRect(5, 0, (layer_get_bounds(window_layer).size.w - 10), 5);
 
     //for each message, render a new bubble (stored in the text layers array), adjust the important bounds object, and update the scroll layer's size
-    for(int index = 0; index < msgsCount; index++) {
+    for(int index = msgsCount - 1; index >= 0; index--) {
       //render the bubble for the message
       s_text_layers[index] = render_new_bubble(index, bounds);
       //adjust bounds based on the height of the bubble rendered
@@ -157,23 +154,7 @@ static void draw_message_bubbles(){
 
 //adds a new message to the messages array but does not render anything
 static void add_new_message(char *text, bool is_user){
-  // // safeguard to prevent too many bubbles being added
-  // // I have no experience managing memory so review here would be great. let's get as many messages as possible!
-  // if(s_num_messages < MAX_MESSAGES && strlen(text) > 0) {
-  //   //set the message text and the is_user bool
-  //   strncpy(s_message_bubbles[s_num_messages].text, text, MAX_MESSAGE_LENGTH - 1);
-  //   s_message_bubbles[s_num_messages].is_user = is_user;
-  //   //increment the number of messages int. This int is used throughout the other functions
-  //   s_num_messages++;
-  // } else {
-  //   APP_LOG(APP_LOG_LEVEL_WARNING, "Failed to add message to bubble list; exceeded maximum number of bubbles");
-  // }
-
-  	char* buf = malloc(*text);
-		// printf("Message: ");
-		// fgets(buf,64,stdin);
-
-		msg_push((MessageBubble){buf, strlen(buf), is_user});
+		msg_push((MessageBubble){text, strlen(text), is_user});
 }
 
 
