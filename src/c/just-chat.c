@@ -36,10 +36,12 @@ static int msgsCount = 0;
 //   // return s_num_messages;
 // }
 
-MessageBubble *get_message_by_id(int id) {
-  return &s_message_bubbles[id];
-}
+// MessageBubble *get_message_by_id(int id) {
+//   return &s_message_bubbles[id];
+// }
 
+
+//big thanks to @UDXS for this array / memory management code for MessageBubble!
 
 int msgs_get_idx(int idx){
 	int trueIdx = msgsTop - 1 - idx;
@@ -173,7 +175,9 @@ static void handle_transcription(char *transcription_text) {
   app_message_outbox_send();
 
   //adds the transcription to the messages array so it is displayed as a bubble. true indicates that this message is from a user
-  add_new_message(transcription_text, true);
+  char* text = malloc(strlen(transcription_text));
+  strcpy(text, transcription_text);
+  add_new_message(text, true);
 
   //update the view so new message is drawn
   draw_message_bubbles();
@@ -291,9 +295,17 @@ static void prv_window_load(Window *window) {
   layer_add_child(window_layer, scroll_layer_get_layer(s_scroll_layer));
 
   //testing
+  add_new_message("test test test test test test test test test test test test test test test test test test ", true);
+  add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
   // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
   // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
-  // draw_message_bubbles();
+  // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
+  // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
+  // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
+  // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
+  // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
+  // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
+  draw_message_bubbles();
 
 }
 
