@@ -231,7 +231,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   if (message_text_tuple) {
     //if an appmessage has a ActionResponse key, read the value and add a new message. Since this is the assistant, the is_user flag is set to false
     char* text = malloc(strlen(message_text_tuple->value->cstring) + 1);
-    memset(text, strlen(text)+1, 0);
+    memset(text, strlen(message_text_tuple->value->cstring)+1, 0);
     strcpy(text, message_text_tuple->value->cstring);
     add_new_message(text, false);
     // add_new_message(message_text_tuple->value->cstring, false);
