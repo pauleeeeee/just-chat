@@ -120,10 +120,12 @@ TextLayer *render_new_bubble(int index, GRect bounds) {
 
   //set alignment depending on whether the message was made by the user or the assistant
   if (msgs_get(index)->is_user){
-    text_layer_set_text_alignment(text_layer, GTextAlignmentRight);
+    text_layer_set_text_alignment(text_layer, PBL_IF_ROUND_ELSE(GTextAlignmentCenter, GTextAlignmentRight));
   } else {
-    text_layer_set_text_alignment(text_layer, GTextAlignmentLeft);
+    text_layer_set_text_alignment(text_layer, PBL_IF_ROUND_ELSE(GTextAlignmentCenter, GTextAlignmentLeft));
   }
+
+  
 
   //do not get creative here
   text_layer_set_font(text_layer, font);
@@ -285,7 +287,7 @@ static void prv_window_load(Window *window) {
   dictation_session_enable_confirmation(s_dictation_session, should_confirm_dictation);
 
   //create scroll layer 
-  GRect scroll_bounds = GRect(0, 0, bounds.size.w, bounds.size.h);
+  GRect scroll_bounds = GRect(0, 0, bounds.size.w, PBL_IF_ROUND_ELSE(bounds.size.h - 40, bounds.size.h));
   s_scroll_layer = scroll_layer_create(scroll_bounds);
   // Set the scrolling content size
   scroll_layer_set_content_size(s_scroll_layer, GSize(scroll_bounds.size.w, scroll_bounds.size.h-2));
