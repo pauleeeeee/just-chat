@@ -5,6 +5,8 @@ Ideas:
 1. More message types: Emojis, PDCs, other fun media
 2. Allow for friends / direct message abilities
 3. User entered / exited messages
+4. Fancier message bubbles
+5. By-user message bubble colors (could be chosen in config)
 
 
 Needs: 

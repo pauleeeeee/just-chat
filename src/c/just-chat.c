@@ -161,7 +161,7 @@ static void draw_message_bubbles(){
 
 //adds a new message to the messages array but does not render anything
 static void add_new_message(char *text, bool is_user){
-		msg_push((MessageBubble){text, strlen(text), is_user});
+		msg_push((MessageBubble){text, strlen(text) + 1, is_user});
 }
 
 
@@ -180,7 +180,8 @@ static void handle_transcription(char *transcription_text) {
   app_message_outbox_send();
 
   //adds the transcription to the messages array so it is displayed as a bubble. true indicates that this message is from a user
-  char* text = malloc(strlen(transcription_text + 1));
+  char* text = malloc(strlen(transcription_text) + 1);
+  memset(text, strlen(transcription_text)+1, 0);
   strcpy(text, transcription_text);
   add_new_message(text, true);
 
@@ -230,6 +231,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   if (message_text_tuple) {
     //if an appmessage has a ActionResponse key, read the value and add a new message. Since this is the assistant, the is_user flag is set to false
     char* text = malloc(strlen(message_text_tuple->value->cstring) + 1);
+    memset(text, strlen(text)+1, 0);
     strcpy(text, message_text_tuple->value->cstring);
     add_new_message(text, false);
     // add_new_message(message_text_tuple->value->cstring, false);

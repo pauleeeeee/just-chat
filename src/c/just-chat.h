@@ -5,9 +5,9 @@
 
 
 // #define DOTSHEIGHT 28
-#define MAX_MESSAGES 5
+#define MAX_MESSAGES 25
 #define MAX_MESSAGE_LENGTH 512
-#define MAX_MESSAGES_POOL_SIZE 2560
+#define MAX_MESSAGES_POOL_SIZE 12800
 
 #define MessageText 100
 #define MessageUser 101
