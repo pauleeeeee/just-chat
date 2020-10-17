@@ -63,6 +63,7 @@ void msg_delete_last(){
 
 void msg_gc(int bytes){ // Garbage Collect.
 	if(bytes > MAX_MESSAGES_POOL_SIZE) {
+    printf("MAX POOL limit hit");
 		return; // Error.
 	}
 	while(msgsDataAvailable < bytes){ // Just keep deleting message entries until we have space.
@@ -71,7 +72,8 @@ void msg_gc(int bytes){ // Garbage Collect.
 }
 
 MessageBubble* msg_push(MessageBubble msg){
-	if(msg.len > MAX_MESSAGES_POOL_SIZE){ // Message too long for buffer. 
+	if(msg.len > MAX_MESSAGES_POOL_SIZE){ // Message too long for buffer.
+    printf("message too long for buffer"); 
 		return NULL; // Error.
 	}
 	msg_gc(msg.len); // Ensure there is room in the message string data buffer for this new message.
@@ -175,7 +177,7 @@ static void handle_transcription(char *transcription_text) {
   app_message_outbox_send();
 
   //adds the transcription to the messages array so it is displayed as a bubble. true indicates that this message is from a user
-  char* text = malloc(strlen(transcription_text));
+  char* text = malloc(strlen(transcription_text + 1));
   strcpy(text, transcription_text);
   add_new_message(text, true);
 
@@ -295,14 +297,6 @@ static void prv_window_load(Window *window) {
   layer_add_child(window_layer, scroll_layer_get_layer(s_scroll_layer));
 
   //testing
-  add_new_message("test test test test test test test test test test test test test test test test test test ", true);
-  add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
-  // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
-  // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
-  // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
-  // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
-  // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
-  // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
   // add_new_message("test test test test test test test test test test test test test test test test test test ", true);
   // add_new_message("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test ", false);
   draw_message_bubbles();
